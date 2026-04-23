@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IFEDEL 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+:root {
+  --dark:#1A3A2A; --mid:#2D6A4F; --light:#D8EFE0; --pale:#F0FAF4;
+  --gold:#B8860B; --pos:#1A6B35; --neg:#C0392B; --posL:#C8E6C9; --negL:#FDECEA;
+  --blue:#1565C0; --purple:#6A0DAD; --orange:#E67E00; --gray:#6B7280; --border:#E5E7EB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#F3F4F6;font-size:13px;color:#222}
+.app{min-height:100vh;display:flex;flex-direction:column}
+
+/* Header */
+.header{background:var(--dark);padding:16px 20px 0}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.logo{color:#fff;font-size:22px;font-weight:900;letter-spacing:-0.5px}
+.logo-sub{color:#A7C4B5;font-size:11px;margin-top:2px}
+.header-kpi{display:flex;gap:16px;align-items:center}
+.header-kpi-item{text-align:right}
+.header-kpi-item .val{color:#fff;font-size:16px;font-weight:700}
+.header-kpi-item .lbl{color:#A7C4B5;font-size:10px}
+.divider{width:1px;height:32px;background:rgba(255,255,255,0.2)}
+.tabs{display:flex;gap:2px}
+.tab-btn{padding:8px 14px;font-size:12px;font-weight:600;border:none;border-radius:6px 6px 0 0;
+  border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;background:#253F30;color:#A7C4B5}
+.tab-btn.active{background:#fff;color:var(--mid);border-bottom-color:var(--mid)}
+.tab-btn:hover:not(.active){background:#2D4D3A;color:#fff}
+
+/* Content */
+.content{padding:16px;flex:1}
+.section{display:flex;flex-direction:column;gap:14px}
+
+/* Cards */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #F0F0F0;padding:16px}
+.card-title{font-weight:700;font-size:12px;color:var(--dark);margin-bottom:12px}
+.card-sub{font-size:10px;color:var(--gray);margin-top:-8px;margin-bottom:10px}
+
+/* KPI grid */
+.kpi-grid{display:grid;gap:10px}
+.kpi-grid-4{grid-template-columns:repeat(4,1fr)}
+.kpi-grid-3{grid-template-columns:repeat(3,1fr)}
+.kpi-grid-2{grid-template-columns:repeat(2,1fr)}
+.kpi-card{background:#fff;border-radius:10px;border:1px solid #F0F0F0;box-shadow:0 1px 3px rgba(0,0,0,.06);padding:12px}
+.kpi-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:4px}
+.kpi-val{font-size:18px;font-weight:800}
+.kpi-sub{font-size:10px;color:var(--gray);margin-top:3px}
+.kpi-sm .kpi-val{font-size:22px;text-align:center}
+.kpi-sm .kpi-label{text-align:center}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{background:var(--mid);color:#fff}
+thead th{padding:7px 8px;text-align:right;font-weight:600;white-space:nowrap}
+thead th:first-child{text-align:left}
+tbody tr:nth-child(even){background:var(--pale)}
+tbody td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--border)}
+tbody td:first-child{text-align:left;font-weight:600;color:var(--dark)}
+tfoot tr{background:var(--dark);color:#fff}
+tfoot td{padding:7px 8px;text-align:right;font-weight:700}
+tfoot td:first-child{text-align:left}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.form-group label{display:block;font-size:10px;font-weight:600;color:var(--gray);margin-bottom:3px}
+.form-group input,.form-group select{width:100%;border:1px solid var(--border);border-radius:6px;
+  padding:6px 8px;font-size:12px;color:var(--blue);outline:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--mid)}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn-primary{background:var(--mid);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700}
+
+/* Client bar */
+.client-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.client-name{width:140px;font-size:10px;color:var(--gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.client-bar-bg{flex:1;height:20px;background:#F3F4F6;border-radius:4px;overflow:hidden;position:relative}
+.client-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .4s}
+.client-val{width:90px;font-size:11px;font-weight:700;text-align:right;color:var(--dark);flex-shrink:0}
+.client-pct{width:50px;flex-shrink:0;text-align:right}
+
+/* Editable table inputs */
+.cell-input{width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 6px;
+  font-size:11px;text-align:right;color:var(--blue);background:#EBF5FB;outline:none}
+.cell-input:focus{border-color:var(--blue)}
+
+/* Pipeline select */
+.pip-select,.pip-input{border:1px solid var(--border);border-radius:4px;padding:3px 5px;
+  font-size:10px;outline:none;width:100%;background:#F3E8FF}
+.del-btn{background:none;border:none;cursor:pointer;color:#DDD;font-size:14px;padding:0 4px}
+.del-btn:hover{color:var(--neg)}
+
+/* Chart legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--gray)}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* Alert */
+.alert-note{font-size:10px;color:var(--gray);margin-top:8px;padding:8px 10px;
+  background:#FFFBEB;border-left:3px solid var(--gold);border-radius:0 6px 6px 0}
+
+@media(max-width:600px){
+  .kpi-grid-4{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useMemo} = React;
+
+// ── Constants ──────────────────────────────────────────────────────────────
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                 "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const COLORS = ["#2D6A4F","#1565C0","#B8860B","#6A0DAD","#E67E00","#C0392B","#0097A7","#558B2F"];
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const $  = (n) => n == null || isNaN(n) ? "—" :
+  new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+const pc = (n) => (!isFinite(n)||isNaN(n)) ? "—" : `${(n*100).toFixed(1)}%`;
+const n  = (v) => parseFloat(v)||0;
+const abbr = (v) => Math.abs(v)>=1e6?`${(v/1e6).toFixed(1)}M`:Math.abs(v)>=1000?`${(v/1000).toFixed(0)}k`:v.toFixed(0);
+
+// ── Seed data ──────────────────────────────────────────────────────────────
+const SEED_V = [
+  {id:1,mes:"Diciembre",cliente:"Santi Bunge - Salinas de Anzoategui",ventaBruta:12045947,costoBruto:10176508,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:2,mes:"Febrero",cliente:"Hilario Lanusse - Cía. Meridional",ventaBruta:9306859,costoBruto:7859670,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:3,mes:"Julio",cliente:"Bahia San Martin SA (tranqueras)",ventaBruta:8168986,costoBruto:6706393,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:4,mes:"Enero",cliente:"Santi Bunge - Salinas de Anzoategui",ventaBruta:3623297,costoBruto:3336127,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:5,mes:"Agosto",cliente:"Santiago Hollmann Expo",ventaBruta:3585660,costoBruto:2728141,comisiones:420576,cobrado:"Sí",comentarios:""},
+  {id:6,mes:"Octubre",cliente:"Mercado Libre - Cía. Meridional",ventaBruta:3100000,costoBruto:2171085,comisiones:728500,cobrado:"Sí",comentarios:""},
+  {id:7,mes:"Noviembre",cliente:"Santiago Hollmann Baston XRSi2",ventaBruta:2412000,costoBruto:2134400,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:8,mes:"Noviembre",cliente:"Santiago Hollmann Caravanas",ventaBruta:1985818,costoBruto:1688606,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:9,mes:"Febrero",cliente:"Santi Bunge - Salinas de Anzoategui",ventaBruta:1063811,costoBruto:744918,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:10,mes:"Julio",cliente:"Santiago Hollmann Handys",ventaBruta:557461,costoBruto:433459,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:11,mes:"Mayo",cliente:"Pedro",ventaBruta:862730,costoBruto:728130,comisiones:20976,cobrado:"Sí",comentarios:""},
+  {id:12,mes:"Agosto",cliente:"Sandel Ganadera SRL Pedro",ventaBruta:281809,costoBruto:100070,comisiones:10000,cobrado:"Sí",comentarios:""},
+  {id:13,mes:"Noviembre",cliente:"Santiago Hollmann Valvulas",ventaBruta:310844,costoBruto:236966,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:14,mes:"Noviembre",cliente:"ML - La Roseta Bonifacio",ventaBruta:150000,costoBruto:59048,comisiones:51402,cobrado:"Sí",comentarios:""},
+  {id:15,mes:"Abril",cliente:"Potelar SA (Rivero)",ventaBruta:172047,costoBruto:93750,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:16,mes:"Junio",cliente:"ML - Norma",ventaBruta:180000,costoBruto:88572,comisiones:49739,cobrado:"Sí",comentarios:""},
+  {id:17,mes:"Abril",cliente:"Santamarina Ignacio",ventaBruta:294370,costoBruto:268250,comisiones:0,cobrado:"Sí",comentarios:""},
+  {id:18,mes:"Abril",cliente:"Fideicomisos Rurales SA",ventaBruta:314194,costoBruto:247219,comisiones:36020,cobrado:"Sí",comentarios:""},
+];
+const CF0 = {Enero:[210000,55000,119000],Febrero:[210000,55000,119000],Marzo:[180000,44000,100000],
+  Abril:[180000,44000,100000],Mayo:[180000,44000,100000],Junio:[228000,0,0],
+  Julio:[228000,0,0],Agosto:[228000,0,0],Septiembre:[210000,55000,0],
+  Octubre:[210000,55000,0],Noviembre:[210000,55000,118194],Diciembre:[210000,55000,0]};
+const IV0 = {Enero:[10000,0,0],Febrero:[10000,0,0],Marzo:[10000,0,0],
+  Abril:[10000,0,0],Mayo:[12000,0,0],Junio:[175940,0,0],
+  Julio:[226744,0,0],Agosto:[134353,0,0],Septiembre:[137145,0,0],
+  Octubre:[126064,0,0],Noviembre:[0,0,0],Diciembre:[119660,0,0]};
+
+const initCF = () => Object.fromEntries(MONTHS.map(m=>[m,{contador:CF0[m][0],banco:CF0[m][1],autonomos:CF0[m][2],otros:0}]));
+const initIV = () => Object.fromEntries(MONTHS.map(m=>[m,{iva:IV0[m][0],iibb:IV0[m][1],impCD:IV0[m][2],otros:0}]));
+
+// ── SVG Charts ─────────────────────────────────────────────────────────────
+
+function BarChartSVG({data, vKey, lKey, colorFn, h=180, refLine=null, refLabel=""}) {
+  const vals = data.map(d=>d[vKey]);
+  const minV = Math.min(0,...vals), maxV = Math.max(0,...vals);
+  const range = (maxV-minV)||1;
+  const pl=52,pr=10,pt=8,pb=26, cH=h-pt-pb;
+  const cW = "100%"; // handled via viewBox
+  const W = 460;
+  const chartW = W-pl-pr;
+  const barW = (chartW/data.length)*0.6;
+  const xS = i => pl + (i+0.5)*(chartW/data.length);
+  const yS = v => pt + ((maxV-v)/range)*cH;
+  const zY = yS(0);
+  const ticks = 4;
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${h}`} style={{display:"block"}}>
+      {Array.from({length:ticks+1},(_,i)=>minV+(i/ticks)*range).map((tv,i)=>(
+        <g key={i}>
+          <line x1={pl} y1={yS(tv)} x2={W-pr} y2={yS(tv)} stroke="#E5E7EB" strokeWidth="1"/>
+          <text x={pl-4} y={yS(tv)+3.5} textAnchor="end" fontSize="8.5" fill="#9CA3AF">{abbr(tv)}</text>
+        </g>
+      ))}
+      <line x1={pl} y1={zY} x2={W-pr} y2={zY} stroke="#9CA3AF" strokeWidth="1.5"/>
+      {refLine!==null && <line x1={pl} y1={yS(refLine)} x2={W-pr} y2={yS(refLine)} stroke="#C0392B" strokeWidth="1.5" strokeDasharray="5,3"/>}
+      {refLine!==null && <text x={W-pr-2} y={yS(refLine)-3} textAnchor="end" fontSize="8" fill="#C0392B">{refLabel}</text>}
+      {data.map((d,i)=>{
+        const v=d[vKey]; const bY=v>=0?yS(v):zY; const bH=Math.max(1,Math.abs(yS(v)-zY));
+        const col=typeof colorFn==="function"?colorFn(d,i):colorFn;
+        return (
+          <g key={i}>
+            <rect x={xS(i)-barW/2} y={bY} width={barW} height={bH} fill={col} rx="2"/>
+            <text x={xS(i)} y={h-pb+13} textAnchor="middle" fontSize="8.5" fill="#9CA3AF">
+              {(d[lKey]||"").slice(0,3)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function GroupedBarSVG({data, keys, colors, lKey, h=180}) {
+  const allVals = data.flatMap(d=>keys.map(k=>d[k]||0));
+  const maxV = Math.max(0,...allVals), minV = 0;
+  const range = maxV||1;
+  const pl=52,pr=10,pt=8,pb=26, cH=h-pt-pb, W=460, chartW=W-pl-pr;
+  const groupW = chartW/data.length;
+  const barW = groupW*0.35;
+  const xS = (i,ki) => pl + i*groupW + (ki+0.5)*groupW/keys.length;
+  const yS = v => pt + ((maxV-v)/range)*cH;
+  const ticks = 4;
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${h}`} style={{display:"block"}}>
+      {Array.from({length:ticks+1},(_,i)=>i/ticks*maxV).map((tv,i)=>(
+        <g key={i}>
+          <line x1={pl} y1={yS(tv)} x2={W-pr} y2={yS(tv)} stroke="#E5E7EB" strokeWidth="1"/>
+          <text x={pl-4} y={yS(tv)+3.5} textAnchor="end" fontSize="8.5" fill="#9CA3AF">{abbr(tv)}</text>
+        </g>
+      ))}
+      {data.map((d,i)=>(
+        <g key={i}>
+          {keys.map((k,ki)=>{
+            const v=d[k]||0; const bY=yS(v); const bH=Math.max(1,cH-bY+pt);
+            return <rect key={ki} x={xS(i,ki)-barW/2} y={bY} width={barW} height={h-pb-bY} fill={colors[ki]} rx="2"/>;
+          })}
+          <text x={pl+i*groupW+groupW/2} y={h-pb+13} textAnchor="middle" fontSize="8.5" fill="#9CA3AF">
+            {(d[lKey]||"").slice(0,3)}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function AreaChartSVG({data, vKey, lKey, color="#2D6A4F", h=180}) {
+  const vals = data.map(d=>d[vKey]||0);
+  const minV = Math.min(0,...vals), maxV = Math.max(0,...vals);
+  const range = (maxV-minV)||1;
+  const pl=52,pr=10,pt=8,pb=26, cH=h-pt-pb, W=460, chartW=W-pl-pr;
+  const xS = i => pl + i*(chartW/(data.length-1));
+  const yS = v => pt + ((maxV-v)/range)*cH;
+  const zY = yS(0);
+  const pts = data.map((_,i)=>`${xS(i)},${yS(vals[i])}`).join(" ");
+  const areaPath = `M${xS(0)},${zY} L${data.map((_,i)=>`${xS(i)},${yS(vals[i])}`).join(" L")} L${xS(data.length-1)},${zY} Z`;
+  const ticks = 4;
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${h}`} style={{display:"block"}}>
+      {Array.from({length:ticks+1},(_,i)=>minV+(i/ticks)*range).map((tv,i)=>(
+        <g key={i}>
+          <line x1={pl} y1={yS(tv)} x2={W-pr} y2={yS(tv)} stroke="#E5E7EB" strokeWidth="1"/>
+          <text x={pl-4} y={yS(tv)+3.5} textAnchor="end" fontSize="8.5" fill="#9CA3AF">{abbr(tv)}</text>
+        </g>
+      ))}
+      <line x1={pl} y1={zY} x2={W-pr} y2={zY} stroke="#C0392B" strokeWidth="1" strokeDasharray="4,3"/>
+      <defs>
+        <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.25"/>
+          <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#ag)"/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5"/>
+      {data.map((_,i)=><circle key={i} cx={xS(i)} cy={yS(vals[i])} r="3.5" fill={color} stroke="#fff" strokeWidth="1.5"/>)}
+      {data.map((d,i)=>(
+        <text key={i} x={xS(i)} y={h-pb+13} textAnchor="middle" fontSize="8.5" fill="#9CA3AF">
+          {(d[lKey]||"").slice(0,3)}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+// ── UI Helpers ─────────────────────────────────────────────────────────────
+const KPI = ({label,val,sub,color="var(--mid)",sm=false}) => (
+  <div className={`kpi-card ${sm?"kpi-sm":""}`}>
+    <div className="kpi-label">{label}</div>
+    <div className="kpi-val" style={{color}}>{val}</div>
+    {sub && <div className="kpi-sub">{sub}</div>}
+  </div>
+);
+
+const Bdg = ({text,color}) => (
+  <span className="badge" style={{background:color+"22",color}}>{text}</span>
+);
+
+// ── Main App ───────────────────────────────────────────────────────────────
+function App() {
+  const [tab, setTab]       = useState("dashboard");
+  const [ventas, setVentas] = useState(SEED_V);
+  const [cf, setCF]         = useState(initCF());
+  const [iv, setIV]         = useState(initIV());
+  const [pip, setPip]       = useState([{id:200,mes:"Enero",cliente:"",ventaEst:0,margenEst:0.16,comEst:0,prob:0.8,estado:"En Negociación",comentarios:""}]);
+  const [nv, setNV]         = useState({mes:"Enero",cliente:"",ventaBruta:"",costoBruto:"",comisiones:"",cobrado:"No",comentarios:""});
+  const [uid, setUid]       = useState(300);
+
+  // Derived
+  const monthly = useMemo(()=>MONTHS.map(mes=>{
+    const ops=ventas.filter(v=>v.mes===mes);
+    const venta=ops.reduce((s,v)=>s+n(v.ventaBruta),0);
+    const costo=ops.reduce((s,v)=>s+n(v.costoBruto),0);
+    const com=ops.reduce((s,v)=>s+n(v.comisiones),0);
+    const rb=venta-costo-com;
+    const cfT=(cf[mes].contador||0)+(cf[mes].banco||0)+(cf[mes].autonomos||0)+(cf[mes].otros||0);
+    const ivT=(iv[mes].iva||0)+(iv[mes].iibb||0)+(iv[mes].impCD||0)+(iv[mes].otros||0);
+    const ro=rb-cfT-ivT;
+    return {mes,venta,costo,com,rb,cfT,ivT,ro,
+      rbPct:venta?rb/venta:0, comPct:venta?com/venta:0, roPct:venta?ro/venta:0, ops:ops.length};
+  }),[ventas,cf,iv]);
+
+  const cum = useMemo(()=>{let a=0;return monthly.map(m=>({...m,acum:(a+=m.ro)}));},[monthly]);
+
+  const tot = useMemo(()=>({
+    venta:monthly.reduce((s,m)=>s+m.venta,0), rb:monthly.reduce((s,m)=>s+m.rb,0),
+    com:monthly.reduce((s,m)=>s+m.com,0), cfT:monthly.reduce((s,m)=>s+m.cfT,0),
+    ivT:monthly.reduce((s,m)=>s+m.ivT,0), ro:monthly.reduce((s,m)=>s+m.ro,0),
+    ops:ventas.length, pos:monthly.filter(m=>m.ro>0).length,
+    neg:monthly.filter(m=>m.ro<0&&m.venta>0).length,
+    zero:monthly.filter(m=>m.venta===0).length,
+  }),[monthly,ventas]);
+
+  const clients = useMemo(()=>{
+    const m={};
+    ventas.forEach(v=>{
+      if(!m[v.cliente])m[v.cliente]={vb:0,rent:0,ops:0};
+      m[v.cliente].vb+=n(v.ventaBruta);
+      m[v.cliente].rent+=n(v.ventaBruta)-n(v.costoBruto)-n(v.comisiones);
+      m[v.cliente].ops++;
+    });
+    return Object.entries(m).map(([k,v])=>({
+      cliente:k,...v,pct:v.vb?v.rent/v.vb:0
+    })).sort((a,b)=>b.rent-a.rent);
+  },[ventas]);
+
+  const pipTot = useMemo(()=>{
+    const ops=pip.filter(p=>p.cliente);
+    return {
+      est:ops.reduce((s,p)=>s+n(p.ventaEst)*(n(p.margenEst)-n(p.comEst)),0),
+      pond:ops.reduce((s,p)=>s+n(p.ventaEst)*(n(p.margenEst)-n(p.comEst))*n(p.prob),0),
+      enNeg:ops.filter(p=>p.estado==="En Negociación").length,
+    };
+  },[pip]);
+
+  // Handlers
+  const addVenta=()=>{
+    if(!nv.cliente||!nv.ventaBruta)return;
+    setVentas(p=>[...p,{...nv,id:uid,ventaBruta:n(nv.ventaBruta),costoBruto:n(nv.costoBruto),comisiones:n(nv.comisiones)}]);
+    setUid(u=>u+1);
+    setNV({mes:"Enero",cliente:"",ventaBruta:"",costoBruto:"",comisiones:"",cobrado:"No",comentarios:""});
+  };
+  const updCF=(m,f,v)=>setCF(p=>({...p,[m]:{...p[m],[f]:n(v)}}));
+  const updIV=(m,f,v)=>setIV(p=>({...p,[m]:{...p[m],[f]:n(v)}}));
+  const addPip=()=>setPip(p=>[...p,{id:uid+1,mes:"Enero",cliente:"",ventaEst:0,margenEst:0.15,comEst:0,prob:0.5,estado:"En Negociación",comentarios:""}]);
+  const updPip=(id,f,v)=>setPip(p=>p.map(x=>x.id===id?{...x,[f]:v}:x));
+
+  const TABS = [
+    {id:"dashboard",label:"📊 Dashboard"},{id:"ventas",label:"💼 Ventas"},
+    {id:"costos",label:"🏛 Costos Fijos"},{id:"impuestos",label:"📋 Impuestos"},
+    {id:"pipeline",label:"🔮 Pipeline"},
+  ];
+
+  return (
+    <div className="app">
+      {/* ── Header ── */}
+      <div className="header">
+        <div className="header-top">
+          <div>
+            <div className="logo">IFEDEL</div>
+            <div className="logo-sub">Operaciones Agropecuarias · Ejercicio 2026</div>
+          </div>
+          <div className="header-kpi">
+            <div className="header-kpi-item">
+              <div className="val">{$(tot.ro)}</div>
+              <div className="lbl">Resultado Operativo</div>
+            </div>
+            <div className="divider"/>
+            <div className="header-kpi-item">
+              <div className="val">{tot.venta>0?pc(tot.ro/tot.venta):"—"}</div>
+              <div className="lbl">Margen Neto</div>
+            </div>
+          </div>
+        </div>
+        <div className="tabs">
+          {TABS.map(t=>(
+            <button key={t.id} className={`tab-btn${tab===t.id?" active":""}`} onClick={()=>setTab(t.id)}>{t.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="content">
+
+        {/* ════ DASHBOARD ════ */}
+        {tab==="dashboard" && (
+          <div className="section">
+            <div className="kpi-grid kpi-grid-4">
+              <KPI label="Ventas Totales" val={$(tot.venta)} sub={`${tot.ops} operaciones`}/>
+              <KPI label="Rentabilidad Bruta" val={$(tot.rb)} sub={pc(tot.venta?tot.rb/tot.venta:0)+" margen"} color="var(--pos)"/>
+              <KPI label="CF + Impuestos" val={$(tot.cfT+tot.ivT)} sub={`CF ${$(tot.cfT)} · Imp ${$(tot.ivT)}`} color="var(--gold)"/>
+              <KPI label="Resultado Operativo" val={$(tot.ro)} sub={pc(tot.venta?tot.ro/tot.venta:0)+" margen neto"} color={tot.ro>=0?"var(--pos)":"var(--neg)"}/>
+            </div>
+            <div className="kpi-grid kpi-grid-3">
+              <KPI label="Meses en Verde" val={tot.pos} color="var(--pos)" sm/>
+              <KPI label="Meses en Rojo" val={tot.neg} color="var(--neg)" sm/>
+              <KPI label="Sin Actividad" val={tot.zero} color="var(--gold)" sm/>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+              <div className="card">
+                <div className="card-title">Ventas vs. Rentabilidad Bruta</div>
+                <GroupedBarSVG data={monthly} keys={["venta","rb"]} colors={["var(--light)","var(--mid)"]} lKey="mes" h={185}/>
+                <div className="legend">
+                  <div className="legend-item"><div className="legend-dot" style={{background:"var(--light)",border:"1px solid var(--mid)"}}/>Ventas</div>
+                  <div className="legend-item"><div className="legend-dot" style={{background:"var(--mid)"}}/>Rent. Bruta</div>
+                </div>
+              </div>
+              <div className="card">
+                <div className="card-title">Resultado Operativo Mensual</div>
+                <BarChartSVG data={monthly} vKey="ro" lKey="mes" h={185}
+                  colorFn={d=>d.ro>=0?"var(--pos)":"var(--neg)"}/>
+              </div>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+              <div className="card">
+                <div className="card-title">Resultado Acumulado</div>
+                <AreaChartSVG data={cum} vKey="acum" lKey="mes" h={185}/>
+              </div>
+              <div className="card">
+                <div className="card-title">Comisiones % sobre Ventas</div>
+                <div className="card-sub">Línea roja = umbral 15%</div>
+                <BarChartSVG data={monthly} vKey="comPct" lKey="mes" h={165} refLine={0.15} refLabel="15%"
+                  colorFn={d=>d.comPct>0.15?"var(--neg)":"var(--orange)"}/>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-title">Rentabilidad por Cliente (Top 8)</div>
+              {clients.slice(0,8).map((c,i)=>(
+                <div className="client-row" key={i}>
+                  <div className="client-name" title={c.cliente}>{c.cliente}</div>
+                  <div className="client-bar-bg">
+                    <div className="client-bar-fill" style={{
+                      width:`${Math.max(2,(c.rent/clients[0].rent)*100)}%`,
+                      background:COLORS[i%COLORS.length]+"CC"}}/>
+                  </div>
+                  <div className="client-val">{$(c.rent)}</div>
+                  <div className="client-pct">
+                    <Bdg text={pc(c.pct)} color={c.pct>0.15?"var(--pos)":c.pct>0.08?"var(--gold)":"var(--neg)"}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="card">
+              <div className="card-title">Resumen Mensual Completo</div>
+              <div className="tbl-wrap">
+                <table>
+                  <thead><tr>
+                    {["Mes","Ventas","Rent. Bruta","Rent.%","CF","Impuestos","Res.Op.","Res.%","Acumulado","Ops"].map(h=>(
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {cum.map((m,i)=>(
+                      <tr key={m.mes}>
+                        <td>{m.mes}</td>
+                        <td>{m.venta?$(m.venta):<span style={{color:"var(--gray)"}}>—</span>}</td>
+                        <td style={{color:m.rb>=0?"var(--pos)":"var(--neg)"}}>{$(m.rb)}</td>
+                        <td>{m.venta?pc(m.rbPct):"—"}</td>
+                        <td style={{color:"var(--blue)"}}>{$(m.cfT)}</td>
+                        <td style={{color:"#5C6BC0"}}>{$(m.ivT)}</td>
+                        <td style={{fontWeight:700,color:m.ro>=0?"var(--pos)":"var(--neg)"}}>{$(m.ro)}</td>
+                        <td>{m.venta?pc(m.roPct):"—"}</td>
+                        <td style={{fontWeight:600,color:m.acum>=0?"var(--pos)":"var(--neg)"}}>{$(m.acum)}</td>
+                        <td style={{color:m.ops===0?"var(--neg)":"inherit"}}>{m.ops||"0"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot><tr>
+                    <td>TOTAL</td>
+                    <td>{$(tot.venta)}</td>
+                    <td>{$(tot.rb)}</td>
+                    <td>{pc(tot.venta?tot.rb/tot.venta:0)}</td>
+                    <td>{$(tot.cfT)}</td>
+                    <td>{$(tot.ivT)}</td>
+                    <td style={{color:tot.ro>=0?"#86EFAC":"#FCA5A5"}}>{$(tot.ro)}</td>
+                    <td>{pc(tot.venta?tot.ro/tot.venta:0)}</td>
+                    <td style={{color:tot.ro>=0?"#86EFAC":"#FCA5A5"}}>{$(tot.ro)}</td>
+                    <td>{tot.ops}</td>
+                  </tr></tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════ VENTAS ════ */}
+        {tab==="ventas" && (
+          <div className="section">
+            <div className="card">
+              <div className="card-title">+ Nueva Operación</div>
+              <div className="form-grid">
+                {[
+                  ["mes","Mes","select"],["cliente","Cliente","text"],
+                  ["ventaBruta","Venta Bruta ($)","number"],["costoBruto","Costo Bruto ($)","number"],
+                  ["comisiones","Comisiones ($)","number"],["cobrado","Cobrado","select"],
+                ].map(([f,l,t])=>(
+                  <div className="form-group" key={f}>
+                    <label>{l}</label>
+                    {t==="select" ? (
+                      <select value={nv[f]} onChange={e=>setNV(p=>({...p,[f]:e.target.value}))}>
+                        {f==="mes"?MONTHS.map(m=><option key={m}>{m}</option>):
+                         ["No","Sí","Parcial"].map(o=><option key={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <input type={t} placeholder={t==="number"?"0":""}
+                        value={nv[f]} onChange={e=>setNV(p=>({...p,[f]:e.target.value}))}/>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button className="btn btn-primary" onClick={addVenta}>Agregar Operación</button>
+            </div>
+
+            <div className="card">
+              <div className="card-title">Operaciones Registradas ({ventas.length})</div>
+              <div className="tbl-wrap">
+                <table>
+                  <thead><tr>
+                    {["Mes","Cliente","Venta","Costo","M.Bruto","Comisiones","Com.%","Rentabilidad","Rent.%","Cobrado",""].map(h=>(
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {ventas.map((v,i)=>{
+                      const mb=n(v.ventaBruta)-n(v.costoBruto);
+                      const rent=mb-n(v.comisiones);
+                      const comP=n(v.ventaBruta)?n(v.comisiones)/n(v.ventaBruta):0;
+                      const rentP=n(v.ventaBruta)?rent/n(v.ventaBruta):0;
+                      const alert=comP>0.15;
+                      return (
+                        <tr key={v.id}>
+                          <td>{v.mes}</td>
+                          <td style={{maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={v.cliente}>{v.cliente}</td>
+                          <td>{$(n(v.ventaBruta))}</td>
+                          <td style={{color:"var(--gray)"}}>{$(n(v.costoBruto))}</td>
+                          <td style={{color:"var(--pos)",fontWeight:600}}>{$(mb)}</td>
+                          <td style={{color:alert?"var(--neg)":"inherit"}}>{$(n(v.comisiones))}</td>
+                          <td>
+                            <span style={{padding:"2px 6px",borderRadius:10,fontSize:10,fontWeight:700,
+                              background:alert?"var(--negL)":"#F3F4F6",color:alert?"var(--neg)":"var(--gray)"}}>
+                              {pc(comP)}
+                            </span>
+                          </td>
+                          <td style={{fontWeight:700,color:rent>=0?"var(--pos)":"var(--neg)"}}>{$(rent)}</td>
+                          <td>{pc(rentP)}</td>
+                          <td><Bdg text={v.cobrado} color={v.cobrado==="Sí"?"var(--pos)":v.cobrado==="Parcial"?"var(--gold)":"var(--neg)"}/></td>
+                          <td><button className="del-btn" onClick={()=>setVentas(p=>p.filter(x=>x.id!==v.id))}>✕</button></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot><tr>
+                    <td colSpan={2}>TOTAL</td>
+                    <td>{$(tot.venta)}</td>
+                    <td>{$(tot.venta-tot.rb-tot.com)}</td>
+                    <td>{$(tot.rb+tot.com)}</td>
+                    <td>{$(tot.com)}</td>
+                    <td>{pc(tot.venta?tot.com/tot.venta:0)}</td>
+                    <td style={{color:"#86EFAC"}}>{$(tot.rb)}</td>
+                    <td>{pc(tot.venta?tot.rb/tot.venta:0)}</td>
+                    <td colSpan={2}/>
+                  </tr></tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════ COSTOS FIJOS ════ */}
+        {tab==="costos" && (
+          <div className="section">
+            <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:12,alignItems:"start"}}>
+              <div className="card" style={{flex:1}}>
+                <div className="card-title">Costos Fijos Mensuales</div>
+                <p className="card-sub" style={{margin:"0 0 10px"}}>Erogaciones que no dependen del nivel de ventas</p>
+                <div className="tbl-wrap">
+                  <table>
+                    <thead><tr style={{background:"var(--blue)"}}>
+                      {["Mes","Contador ($)","Banco ($)","Autónomos ($)","Otros ($)","TOTAL CF ($)"].map(h=>(
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr></thead>
+                    <tbody>
+                      {MONTHS.map((m,i)=>{
+                        const r=cf[m];
+                        const tot=(r.contador||0)+(r.banco||0)+(r.autonomos||0)+(r.otros||0);
+                        return (
+                          <tr key={m}>
+                            <td>{m}</td>
+                            {[["contador"],["banco"],["autonomos"],["otros"]].map(([f])=>(
+                              <td key={f} style={{padding:"4px 4px"}}>
+                                <input className="cell-input" type="number"
+                                  value={r[f]||""} placeholder="0"
+                                  onChange={e=>updCF(m,f,e.target.value)}/>
+                              </td>
+                            ))}
+                            <td style={{fontWeight:700,color:"var(--blue)"}}>{$(tot)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot><tr style={{background:"var(--blue)"}}>
+                      <td>TOTAL ANUAL</td>
+                      {[["contador"],["banco"],["autonomos"],["otros"]].map(([f])=>(
+                        <td key={f}>{$(MONTHS.reduce((s,m)=>s+(cf[m][f]||0),0))}</td>
+                      ))}
+                      <td>{$(tot.cfT)}</td>
+                    </tr></tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div className="card">
+              <div className="card-title">Evolución Costos Fijos</div>
+              <BarChartSVG data={monthly} vKey="cfT" lKey="mes" colorFn={()=>"var(--blue)"} h={180}/>
+            </div>
+          </div>
+        )}
+
+        {/* ════ IMPUESTOS VARIABLES ════ */}
+        {tab==="impuestos" && (
+          <div className="section">
+            <div className="card">
+              <div className="card-title">Impuestos Variables por Mes</div>
+              <p className="card-sub" style={{margin:"0 0 10px"}}>Varían según el nivel de actividad del período</p>
+              <div className="tbl-wrap">
+                <table>
+                  <thead><tr style={{background:"#5C6BC0"}}>
+                    {["Mes","IVA ($)","IIBB ($)","Imp. Cred/Déb ($)","Otros ($)","TOTAL IMP ($)"].map(h=>(
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {MONTHS.map((m,i)=>{
+                      const r=iv[m];
+                      const tot=(r.iva||0)+(r.iibb||0)+(r.impCD||0)+(r.otros||0);
+                      return (
+                        <tr key={m}>
+                          <td>{m}</td>
+                          {[["iva"],["iibb"],["impCD"],["otros"]].map(([f])=>(
+                            <td key={f} style={{padding:"4px 4px"}}>
+                              <input className="cell-input" type="number" style={{background:"#EDE7F6"}}
+                                value={r[f]||""} placeholder="0"
+                                onChange={e=>updIV(m,f,e.target.value)}/>
+                            </td>
+                          ))}
+                          <td style={{fontWeight:700,color:"#5C6BC0"}}>{$(tot)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot><tr style={{background:"#5C6BC0"}}>
+                    <td>TOTAL ANUAL</td>
+                    {[["iva"],["iibb"],["impCD"],["otros"]].map(([f])=>(
+                      <td key={f}>{$(MONTHS.reduce((s,m)=>s+(iv[m][f]||0),0))}</td>
+                    ))}
+                    <td>{$(tot.ivT)}</td>
+                  </tr></tfoot>
+                </table>
+              </div>
+            </div>
+            <div className="card">
+              <div className="card-title">Impuestos como % de Ventas</div>
+              <BarChartSVG data={monthly} vKey={m=>m.venta?m.ivT/m.venta:0}
+                lKey="mes" colorFn={()=>"#5C6BC0"} h={180}/>
+            </div>
+          </div>
+        )}
+
+        {/* ════ PIPELINE ════ */}
+        {tab==="pipeline" && (
+          <div className="section">
+            <div className="kpi-grid kpi-grid-3">
+              <KPI label="En Negociación" val={pipTot.enNeg} color="var(--purple)" sm/>
+              <KPI label="Rent. Estimada Total" val={$(pipTot.est)} color="var(--gold)" sm/>
+              <KPI label="Rent. Ponderada (prob.)" val={$(pipTot.pond)} color="var(--pos)" sm/>
+            </div>
+            <div className="card">
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <div className="card-title" style={{margin:0}}>Pipeline de Operaciones</div>
+                <button className="btn btn-purple btn-sm" onClick={addPip}>+ Agregar</button>
+              </div>
+              <div className="tbl-wrap">
+                <table>
+                  <thead><tr style={{background:"var(--purple)"}}>
+                    {["Mes","Cliente","Venta Est.","Margen %","Comisión %","Rent. Est.","Prob. %","Rent. Pond.","Estado",""].map(h=>(
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {pip.map((p,i)=>{
+                      const re=n(p.ventaEst)*(n(p.margenEst)-n(p.comEst));
+                      const rp=re*n(p.prob);
+                      const ca=n(p.comEst)>0.15;
+                      return (
+                        <tr key={p.id}>
+                          <td style={{padding:"4px 4px"}}>
+                            <select className="pip-select" value={p.mes} onChange={e=>updPip(p.id,"mes",e.target.value)}>
+                              {MONTHS.map(m=><option key={m}>{m}</option>)}
+                            </select>
+                          </td>
+                          <td style={{padding:"4px 4px"}}>
+                            <input className="pip-input" placeholder="Cliente"
+                              value={p.cliente} onChange={e=>updPip(p.id,"cliente",e.target.value)}/>
+                          </td>
+                          <td style={{padding:"4px 4px"}}>
+                            <input className="pip-input" type="number" placeholder="0"
+                              value={p.ventaEst||""} onChange={e=>updPip(p.id,"ventaEst",n(e.target.value))}/>
+                          </td>
+                          <td style={{padding:"4px 4px"}}>
+                            <input className="pip-input" type="number" placeholder="%"
+                              value={p.margenEst?(p.margenEst*100).toFixed(0):""} onChange={e=>updPip(p.id,"margenEst",n(e.target.value)/100)}/>
+                          </td>
+                          <td style={{padding:"4px 4px"}}>
+                            <input className="pip-input" type="number" placeholder="%"
+                              style={{color:ca?"var(--neg)":"inherit"}}
+                              value={p.comEst?(p.comEst*100).toFixed(0):""} onChange={e=>updPip(p.id,"comEst",n(e.target.value)/100)}/>
+                          </td>
+                          <td style={{color:"var(--pos)",fontWeight:600}}>{$(re)}</td>
+                          <td style={{padding:"4px 4px"}}>
+                            <input className="pip-input" type="number" placeholder="%"
+                              value={p.prob?(p.prob*100).toFixed(0):""} onChange={e=>updPip(p.id,"prob",n(e.target.value)/100)}/>
+                          </td>
+                          <td style={{fontWeight:700,color:"var(--purple)"}}>{$(rp)}</td>
+                          <td style={{padding:"4px 4px"}}>
+                            <select className="pip-select" value={p.estado} onChange={e=>updPip(p.id,"estado",e.target.value)}>
+                              {["En Negociación","Cerrado","Perdido","En pausa"].map(o=><option key={o}>{o}</option>)}
+                            </select>
+                          </td>
+                          <td><button className="del-btn" onClick={()=>setPip(prev=>prev.filter(x=>x.id!==p.id))}>✕</button></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot><tr style={{background:"var(--purple)"}}>
+                    <td colSpan={5}>TOTAL PIPELINE</td>
+                    <td>{$(pipTot.est)}</td>
+                    <td/>
+                    <td>{$(pipTot.pond)}</td>
+                    <td colSpan={2}/>
+                  </tr></tfoot>
+                </table>
+              </div>
+              <div className="alert-note">
+                ⚠️ Los datos viven en memoria de esta sesión. Usá Ctrl+S / Cmd+S para guardar la página con los datos cargados, o exportá desde el menú del navegador.
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
